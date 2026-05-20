@@ -1,0 +1,32 @@
+{
+    "5634562207": [
+        {
+            "role": "assistant",
+            "content": "New Lead Detected\nFrom: Utkarsh\nSource: Direct Message\n\n*Forwarding message...*"
+        },
+        {
+            "role": "user",
+            "content": "what's up"
+        },
+        {
+            "role": "assistant",
+            "content": "hey! not much, just chilling. how about you?"
+        },
+        {
+            "role": "user",
+            "content": "wht about crypto market today."
+        },
+        {
+            "role": "assistant",
+            "content": "it's been kinda bumpy today, honestly. bitcoin's been fluctuating a bit, and some altcoins are following the trend. keeping an eye on it to see where it goes. you still holding onto any?"
+        },
+        {
+            "role": "user",
+            "content": "hi what about eth coin today"
+        },
+        {
+            "role": "assistant",
+            "content": "hey! eth's been having a bit of a rollercoaster too today. it's been up and down, but that's kinda normal these days. are you thinking about making any moves with it?"
+        }
+    ]
+}
