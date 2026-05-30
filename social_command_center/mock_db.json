@@ -1,0 +1,62 @@
+{
+  "posts": [
+    {
+      "id": "cc59397c-aee8-4daf-9563-9b764c3f559f",
+      "title": "Etherum",
+      "content": "🌟 Dive into the World of Ethereum with SpikeSignals! 🌟\n\nDiscover the fascinating realm of Ethereum, a trailblazer in the blockchain and cryptocurrency space. As the second-largest cryptocurrency by market capitalization, Ethereum stands out for its innovative approach to decentralized applications (dApps) and smart contracts. Unlike its counterparts, Ethereum isn't just a digital currency—it's a comprehensive platform that empowers developers to build and deploy blockchain-based applications across a myriad of industries.\n\nEthereum's ever-evolving ecosystem is home to a vibrant community of developers, entrepreneurs, and enthusiasts, all working towards a decentralized future. Whether you're an investor, a developer, or simply a curious mind, understanding Ethereum's potential can provide valuable insights into the future of technology and finance.\n\nJoin the conversation and explore the possibilities Ethereum offers. How do you see Ethereum shaping the future? Let us know your thoughts! 💡",
+      "hashtags": [
+        "#Ethereum",
+        "#BlockchainInnovation",
+        "#SmartContracts",
+        "#FutureTech",
+        "#CryptoCommunity"
+      ],
+      "status": "Approved",
+      "createdAt": "2026-05-26T11:47:22.693Z",
+      "ctaLink": "https://spikesignals.com/",
+      "disclaimer": "Market data, alerts, and signals are for informational and educational purposes only and are not financial advice."
+    },
+    {
+      "id": "e63268df-c555-414e-b305-4c3c3c72add5",
+      "title": "News",
+      "content": "This is a generated draft about News. Please add your OPENAI_API_KEY to the .env file to enable real AI generation.\n\nBe sure to check out our latest alerts!",
+      "hashtags": [
+        "#SpikeSignals",
+        "#Trading",
+        "#Alerts"
+      ],
+      "status": "Draft",
+      "createdAt": "2026-05-26T11:22:48.254Z",
+      "ctaLink": "https://spikesignals.com/",
+      "disclaimer": "Market data, alerts, and signals are for informational and educational purposes only and are not financial advice."
+    },
+    {
+      "id": "7d5a8a56-9a43-4844-a8ee-a3e73540c5a3",
+      "title": "crypto",
+      "content": "This is a generated draft about crypto. Please add your OPENAI_API_KEY to the .env file to enable real AI generation.\n\nBe sure to check out our latest alerts!",
+      "hashtags": [
+        "#SpikeSignals",
+        "#Trading",
+        "#Alerts"
+      ],
+      "status": "Needs Review",
+      "createdAt": "2026-05-26T11:22:37.129Z",
+      "ctaLink": "https://spikesignals.com/",
+      "disclaimer": "Market data, alerts, and signals are for informational and educational purposes only and are not financial advice."
+    },
+    {
+      "id": "f1fa6027-e82b-4fab-9514-0702976db51a",
+      "title": "bitcoin",
+      "content": "This is a generated draft about bitcoin. Please add your OPENAI_API_KEY to the .env file to enable real AI generation.\n\nBe sure to check out our latest alerts!",
+      "hashtags": [
+        "#SpikeSignals",
+        "#Trading",
+        "#Alerts"
+      ],
+      "status": "Posted",
+      "createdAt": "2026-05-26T11:21:53.031Z",
+      "ctaLink": "https://spikesignals.com/",
+      "disclaimer": "Market data, alerts, and signals are for informational and educational purposes only and are not financial advice."
+    }
+  ]
+}

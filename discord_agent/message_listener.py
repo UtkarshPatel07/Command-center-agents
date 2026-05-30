@@ -1,5 +1,7 @@
 import logging
 import discord
+import aiohttp
+import os
 from config import CONTROL_SERVER_ID, TARGET_CHANNEL_IDS
 from thread_manager import create_control_thread, append_to_control_thread
 from reply_dispatcher import handle_manual_reply
@@ -8,10 +10,37 @@ from priority_engine import is_target_question
 
 logger = logging.getLogger(__name__)
 
+async def post_to_django(message: discord.Message):
+    """POST incoming messages to Django backend webhook."""
+    url = os.getenv("DJANGO_WEBHOOK_URL", "http://127.0.0.1:8000/webhook/messages/")
+    
+    channel_name = message.channel.name if hasattr(message.channel, 'name') else "DM"
+    source_label = f"Direct Message - {message.author.name}" if not message.guild else f"{message.guild.name} - {channel_name}"
+    
+    payload = {
+        source_label: [
+            {
+                "author": message.author.name,
+                "content": message.content,
+                "timestamp": message.created_at.isoformat()
+            }
+        ]
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload) as response:
+                if response.status in (200, 201):
+                    logger.info(f"✅ Successfully posted message to Django API: {message.content}")
+                else:
+                    logger.error(f"❌ Failed to post to Django API. Status: {response.status}")
+    except Exception as e:
+        logger.error(f"❌ Could not connect to Django API: {e}")
+
 async def process_message(client: discord.Client, message: discord.Message):
     """
     Main routing logic for all incoming messages.
     """
+    logger.info(f"Incoming message from {message.author}: {message.content} (Channel: {message.channel.id})")
     # 1. Ignore bot messages
     if message.author.bot:
         return
@@ -34,6 +63,10 @@ async def process_message(client: discord.Client, message: discord.Message):
     # 3. Ignore own messages in external servers to prevent loops
     if message.author.id == client.user.id:
        return
+
+    # POST external messages to Django backend before applying hardcoded channel filters
+    if not message.guild or message.guild.id != CONTROL_SERVER_ID:
+        client.loop.create_task(post_to_django(message))
 
     # 4. Check if there's an active thread for this user
     active_thread_id = state.get_thread_for_user(message.author.id)

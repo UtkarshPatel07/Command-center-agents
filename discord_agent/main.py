@@ -28,7 +28,7 @@ class CommandCenterClient(discord.Client):
         headers = {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Headers": "Content-Type, ngrok-skip-browser-warning",
         }
         return web.Response(headers=headers)
 

@@ -86,8 +86,9 @@ class ScraperClient(discord.Client):
         await self.close()
 
 def run_scraper():
-    # We use discord.py-self which requires a regular client setup
-    client = ScraperClient()
+    intents = discord.Intents.default()
+    intents.message_content = True
+    client = ScraperClient(intents=intents)
     try:
         client.run(TOKEN)
     except discord.errors.LoginFailure:

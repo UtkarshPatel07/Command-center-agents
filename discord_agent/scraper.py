@@ -8,7 +8,7 @@ from playwright.async_api import async_playwright
 # ==========================================
 # CONFIGURE WEBHOOK ENDPOINT
 # ==========================================
-WEBHOOK_URL = None  # e.g., "http://localhost:8000/api/scraper/webhook/"
+WEBHOOK_URL = "http://127.0.0.1:8000/webhook/messages/"
 
 async def scrape_channel(page, server_name, channel_name):
     print(f"\n--- Navigating to Server: {server_name} ---")
@@ -33,8 +33,24 @@ async def scrape_channel(page, server_name, channel_name):
         # Get the last 15 messages
         for el in message_elements[-15:]:
             text = await el.inner_text()
+            
+            # Extract any hyperlinks embedded in the message (like thread links)
+            links = await el.evaluate("""(node) => {
+                return Array.from(node.querySelectorAll('a')).map(a => a.href);
+            }""")
+            
+            # Filter out empty or duplicate links
+            unique_links = []
+            for link in links:
+                if link and link.startswith("http") and link not in unique_links:
+                    unique_links.append(link)
+            
             # Clean up the text a bit (removing newlines, etc for cleaner JSON)
             clean_text = "\n".join([line for line in text.split("\n") if line.strip()])
+            
+            if unique_links:
+                clean_text += "\n\nExtracted Links:\n" + "\n".join(unique_links)
+                
             messages.append(clean_text)
             
         print(f"Successfully scraped {len(messages)} messages from {channel_name}.")
@@ -51,33 +67,41 @@ async def run():
     os.makedirs("videos", exist_ok=True)
     
     async with async_playwright() as p:
-        print("Launching browser... (Headed mode is ON so you can solve CAPTCHAs)")
-        # Headless=False so the user can interact if Discord asks for CAPTCHA or New Login Location verification
-        browser = await p.chromium.launch(headless=False) 
-        context = await browser.new_context(
+        print("Launching browser... (Using persistent profile to save your login)")
+        
+        # Use a persistent context so the user doesn't have to log in every single time!
+        context = await p.chromium.launch_persistent_context(
+            user_data_dir="discord_profile",
+            headless=False,
             record_video_dir="videos/",
             record_video_size={"width": 1280, "height": 720}
         )
-        page = await context.new_page()
+        page = context.pages[0] if context.pages else await context.new_page()
 
-        print("Navigating to Discord login...")
-        await page.goto("https://discord.com/login")
+        print("Navigating to Discord...")
+        await page.goto("https://discord.com/app")
 
-        print("Filling credentials...")
-        await page.fill("input[name='email']", "mailaalaxmi@gmail.com")
-        await page.fill("input[name='password']", "Pass@123456")
-        await page.click("button[type='submit']")
-
-        print("Waiting for login to complete...")
-        print("IMPORTANT: If Discord asks for a CAPTCHA or Email Verification, please do it in the browser window now.")
-        print("Waiting up to 90 seconds for the 'Servers' area to appear...")
+        print("\n" + "="*50)
+        print("ACTION REQUIRED: PLEASE LOG IN MANUALLY")
+        print("="*50)
+        print("An automated browser window has just opened.")
+        print("Please use that window to log into your 'Bright Axis Account'.")
+        print("You have 3 minutes to enter your email, password, and solve any CAPTCHAs.")
+        print("Waiting for you to log in...\n")
         
         try:
-            # Wait until we see the servers list
-            await page.wait_for_selector('[aria-label="Servers sidebar"]', timeout=90000)
+            # Wait until we are logged in and redirected to the channels page
+            await page.wait_for_url("**/channels/**", timeout=180000)
             print("Successfully logged in!")
+            
+            # Discord often shows popups (like Nitro ads). Press Escape to clear them.
+            await page.wait_for_timeout(3000)
+            await page.keyboard.press("Escape")
+            await page.wait_for_timeout(1000)
+            await page.keyboard.press("Escape")
+            
         except Exception as e:
-            print("Timeout waiting for login. Either credentials were wrong, or CAPTCHA/2FA took too long.")
+            print("Timeout waiting for login. You didn't log in fast enough, or closed the window.")
             await context.close()
             await browser.close()
             return
@@ -87,14 +111,28 @@ async def run():
 
         results = {}
 
-        # Target 1: Market cipher -> btc and eth
-        results["Market cipher - btc and eth"] = await scrape_channel(page, "Market cipher", "btc and eth")
-        
-        # Target 2: Market cipher -> shitcoins
-        results["Market cipher - shitcoins"] = await scrape_channel(page, "Market cipher", "shitcoins")
+        # Dynamically fetch channel configs from Django Dashboard
+        print("Fetching channel configurations from Django dashboard...")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("http://127.0.0.1:8000/api/configs/") as response:
+                    if response.status == 200:
+                        configs = await response.json()
+                        print(f"Found {len(configs)} active channel configs.")
+                    else:
+                        print(f"Failed to fetch configs. HTTP Status: {response.status}")
+                        configs = []
+        except Exception as e:
+            print(f"Error connecting to Django dashboard: {e}")
+            configs = []
 
-        # Target 3: Jayson Casper -> general discussion
-        results["Jayson Casper - general discussion"] = await scrape_channel(page, "Jayson Casper", "general discussion")
+        for config in configs:
+            label = config.get("label", "")
+            if " - " in label:
+                server_name, channel_name = label.split(" - ", 1)
+                results[label] = await scrape_channel(page, server_name.strip(), channel_name.strip())
+            else:
+                print(f"Invalid label format (expected 'Server - Channel'): {label}")
 
         # Save results to JSON
         with open("fetched_messages.json", "w", encoding="utf-8") as f:
@@ -120,7 +158,6 @@ async def run():
 
         # Close everything
         await context.close()
-        await browser.close()
 
 if __name__ == "__main__":
     asyncio.run(run())
