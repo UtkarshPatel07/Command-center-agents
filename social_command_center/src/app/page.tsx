@@ -93,6 +93,26 @@ export default function CommandDashboard() {
     }
   };
 
+  const autoPostToLinkedIn = async (post: Post) => {
+    try {
+      const res = await fetch('/api/linkedin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post)
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert("Successfully posted to LinkedIn!");
+        updatePost(post, { status: 'Posted' });
+      } else {
+        alert(`Failed to post to LinkedIn: ${data.error}`);
+      }
+    } catch (err) {
+      alert("Error connecting to LinkedIn API");
+    }
+  };
+
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <Loader2 className="animate-spin" size={48} color="#3b82f6" />
@@ -156,12 +176,15 @@ export default function CommandDashboard() {
                     {post.status === 'Needs Review' && <button onClick={() => updatePost(post, { status: 'Approved' })} className="button" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--success-color)' }}>Approve</button>}
                     
                     {post.status === 'Approved' && (
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <button onClick={() => copyForFacebook(post)} className="button" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Copy size={14} /> Copy
                         </button>
                         <button onClick={() => autoPostToFacebook(post)} className="button" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', background: '#1877F2' }}>
-                          <Send size={14} /> Auto Post
+                          <Send size={14} /> FB Post
+                        </button>
+                        <button onClick={() => autoPostToLinkedIn(post)} className="button" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', background: '#0077b5' }}>
+                          <Send size={14} /> LI Post
                         </button>
                       </div>
                     )}
