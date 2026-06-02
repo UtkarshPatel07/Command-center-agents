@@ -193,16 +193,17 @@ export default function CommandDashboard() {
                     )}
 
                     {post.status === 'Approved' && (
-                      <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px', flexWrap: 'wrap' }}>
                         <input 
                           type="datetime-local" 
                           value={scheduleDates[post.id] || ''}
                           onChange={(e) => setScheduleDates({...scheduleDates, [post.id]: e.target.value})}
-                          style={{ flex: 1 }}
+                          style={{ flex: '1 1 140px', minWidth: 0 }}
                         />
                         <button 
                           onClick={() => scheduleDates[post.id] && updatePost(post, { status: 'Planned', plannedDate: scheduleDates[post.id] })} 
                           className="button secondary" 
+                          style={{ flex: '0 0 auto' }}
                         >
                           Schedule
                         </button>
