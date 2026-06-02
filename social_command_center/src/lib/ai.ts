@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 export const CTA_LINK = "https://spikesignals.com/";
 export const DISCLAIMER = "Market data, alerts, and signals are for informational and educational purposes only and are not financial advice.";
 
-export async function generateDraft(topic: string): Promise<{content: string, hashtags: string[]}> {
+export async function generateDraft(topic: string, language: string = 'English'): Promise<{content: string, hashtags: string[]}> {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -18,13 +18,14 @@ export async function generateDraft(topic: string): Promise<{content: string, ha
 
   const prompt = `
   You are an expert social media manager for SpikeSignals.
-  Write a highly engaging Facebook post about the following topic: "${topic}".
+  Write a highly engaging social media post about the following topic: "${topic}".
   
   CRITICAL RULES:
-  1. DO NOT use any of these risky words/phrases: "guaranteed returns", "get rich", "passive income", "risk-free", "buy now", "sell now".
-  2. The tone should be professional, insightful, and engaging.
-  3. Provide 3-5 relevant hashtags at the very end.
-  4. Do NOT include the CTA or Disclaimer in your generation; they will be appended automatically.
+  1. The entire post and hashtags MUST be written in ${language}.
+  2. DO NOT use any of these risky words/phrases: "guaranteed returns", "get rich", "passive income", "risk-free", "buy now", "sell now".
+  3. The tone should be professional, insightful, and engaging.
+  4. Provide 3-5 relevant hashtags at the very end.
+  5. Do NOT include the CTA or Disclaimer in your generation; they will be appended automatically.
   `;
 
   try {

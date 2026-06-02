@@ -22,13 +22,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { topic } = await request.json();
+    const { topic, language = 'English' } = await request.json();
     
     if (!topic) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
     }
 
-    const aiResult = await generateDraft(topic);
+    const aiResult = await generateDraft(topic, language);
 
     const newPost: Post = {
       id: crypto.randomUUID(),
