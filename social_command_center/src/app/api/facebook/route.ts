@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { content, hashtags, ctaLink, disclaimer } = body;
+    const { content, hashtags, ctaLink, disclaimer, imageUrl } = body;
 
     if (!content) {
       return NextResponse.json({ error: 'Post content is required' }, { status: 400 });
@@ -26,15 +26,23 @@ export async function POST(request: Request) {
 
     const url = `https://graph.facebook.com/v19.0/${FACEBOOK_PAGE_ID}/feed`;
     
+    const bodyPayload: any = {
+      message: message,
+      access_token: FACEBOOK_PAGE_ACCESS_TOKEN
+    };
+    
+    if (ctaLink) {
+      bodyPayload.link = ctaLink;
+    } else if (imageUrl) {
+      bodyPayload.link = imageUrl;
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        message: message,
-        access_token: FACEBOOK_PAGE_ACCESS_TOKEN
-      })
+      body: JSON.stringify(bodyPayload)
     });
 
     const data = await response.json();

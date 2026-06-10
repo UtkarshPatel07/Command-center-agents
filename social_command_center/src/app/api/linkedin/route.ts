@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { content, hashtags, ctaLink, disclaimer } = body;
+    const { content, hashtags, ctaLink, disclaimer, imageUrl } = body;
 
     if (!content) {
       return NextResponse.json({ error: 'Post content is required' }, { status: 400 });
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
                 shareCommentary: {
                     text: message
                 },
-                shareMediaCategory: ctaLink ? "ARTICLE" : "NONE"
+                shareMediaCategory: (ctaLink || imageUrl) ? "ARTICLE" : "NONE"
             }
         },
         visibility: {
@@ -42,11 +42,11 @@ export async function POST(request: Request) {
         }
     };
 
-    if (ctaLink) {
+    if (ctaLink || imageUrl) {
         payload.specificContent["com.linkedin.ugc.ShareContent"].media = [
             {
                 status: "READY",
-                originalUrl: ctaLink
+                originalUrl: imageUrl || ctaLink
             }
         ];
     }

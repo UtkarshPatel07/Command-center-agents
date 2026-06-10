@@ -98,6 +98,26 @@ export default function CommandDashboard() {
     } catch (err) { alert("Error connecting to Telegram API"); }
   };
 
+  const autoPostToReddit = async (post: Post) => {
+    try {
+      const res = await fetch('/api/reddit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
+      if (res.ok) { alert("Successfully posted to Reddit!"); updatePost(post, { status: 'Posted' }); }
+      else { alert(`Failed to post to Reddit: ${(await res.json()).error}`); }
+    } catch (err) { alert("Error connecting to Reddit API"); }
+  };
+
+  const autoPostToInstagram = async (post: Post) => {
+    if (!post.imageUrl) {
+      alert("Instagram requires an image! Please attach an Image URL to this draft before posting.");
+      return;
+    }
+    try {
+      const res = await fetch('/api/instagram', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
+      if (res.ok) { alert("Successfully posted to Instagram!"); updatePost(post, { status: 'Posted' }); }
+      else { alert(`Failed to post to Instagram: ${(await res.json()).error}`); }
+    } catch (err) { alert("Error connecting to Instagram API"); }
+  };
+
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <Loader2 className="animate-spin" size={48} color="var(--accent-color)" />
@@ -161,6 +181,21 @@ export default function CommandDashboard() {
               {posts.filter(p => p.status === status).map(post => (
                 <div key={post.id} className="post-card" style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '20px', borderRadius: '16px', boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}>
                   <h4 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)', lineHeight: 1.4 }}>{post.title}</h4>
+                  
+                  {post.imageUrl && (
+                    <img src={post.imageUrl} alt="Post attachment" style={{ width: '100%', borderRadius: '8px', marginBottom: '12px', objectFit: 'cover', maxHeight: '200px' }} />
+                  )}
+                  
+                  <div style={{ marginBottom: '12px', display: 'flex', gap: '8px' }}>
+                    <input
+                      type="url"
+                      placeholder="Image URL (optional)"
+                      value={post.imageUrl || ''}
+                      onChange={(e) => updatePost(post, { imageUrl: e.target.value })}
+                      style={{ flex: 1, fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
+                    />
+                  </div>
+
                   <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {post.content}
                   </p>
@@ -186,8 +221,14 @@ export default function CommandDashboard() {
                         <button onClick={() => autoPostToTelegram(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--tg-color)' }}>
                           <Send size={14} /> TG Post
                         </button>
-                        <button onClick={() => copyForManual(post)} className="button secondary" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                          <Copy size={14} /> Copy
+                        <button onClick={() => autoPostToReddit(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#FF4500' }}>
+                          <Send size={14} /> Reddit
+                        </button>
+                        <button onClick={() => autoPostToInstagram(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }}>
+                          <Send size={14} /> IG Post
+                        </button>
+                        <button onClick={() => copyForManual(post)} className="button secondary" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', gridColumn: 'span 2' }}>
+                          <Copy size={14} /> Copy for Manual Post
                         </button>
                       </div>
                     )}

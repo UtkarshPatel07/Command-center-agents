@@ -17,15 +17,22 @@ export async function generateDraft(topic: string, language: string = 'English')
   const openai = new OpenAI({ apiKey });
 
   const prompt = `
-  You are an expert social media manager for SpikeSignals.
-  Write a highly engaging social media post about the following topic: "${topic}".
+  You are an expert Content Writer and SEO Specialist for SpikeSignals.
+  Write a highly structured, SEO-optimized "Article-style" social media post about the following topic: "${topic}".
   
-  CRITICAL RULES:
+  CRITICAL RULES FOR SEO ARTICLE FORMATTING:
   1. The entire post and hashtags MUST be written in ${language}.
-  2. DO NOT use any of these risky words/phrases: "guaranteed returns", "get rich", "passive income", "risk-free", "buy now", "sell now".
-  3. The tone should be professional, insightful, and engaging.
-  4. Provide 3-5 relevant hashtags at the very end.
-  5. Do NOT include the CTA or Disclaimer in your generation; they will be appended automatically.
+  2. The content MUST be structured exactly like a high-ranking SEO blog post. It MUST include:
+     - A catchy, bold Headline.
+     - An engaging Introduction that hooks the reader.
+     - Well-structured Body Paragraphs with bold subheadings.
+     - Bullet points or numbered lists to break down complex information clearly.
+     - A strong Conclusion or Summary.
+  3. Use proper Markdown formatting: use bold text (**text**) for emphasis and subheadings, and dashes (-) for bullet points.
+  4. DO NOT use any of these restricted financial words/phrases: "guaranteed returns", "get rich", "passive income", "risk-free", "buy now", "sell now".
+  5. The tone should be conversational yet highly professional and insightful, exactly like a premium educational SEO blog.
+  6. Provide 3-5 relevant SEO hashtags at the very end.
+  7. Do NOT include the CTA link or Disclaimer in your generation; they will be appended automatically.
   `;
 
   try {

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { content, hashtags, ctaLink, disclaimer } = body;
+    const { content, hashtags, ctaLink, disclaimer, imageUrl } = body;
 
     if (!content) {
       return NextResponse.json({ error: 'Post content is required' }, { status: 400 });
@@ -24,18 +24,20 @@ export async function POST(request: Request) {
     // Combine them with newlines
     const text = [content, tags, link, disc].filter(Boolean).join('\n\n');
 
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    const url = imageUrl 
+      ? `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`
+      : `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     
+    const payload = imageUrl
+      ? { chat_id: TELEGRAM_CHAT_ID, photo: imageUrl, caption: text, parse_mode: 'HTML' }
+      : { chat_id: TELEGRAM_CHAT_ID, text: text, parse_mode: 'HTML' };
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: 'HTML'
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();

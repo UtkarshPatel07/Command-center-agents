@@ -12,6 +12,7 @@ export interface Post {
   hashtags: string[];
   ctaLink: string;
   disclaimer: string;
+  imageUrl?: string;
 }
 
 const uri = process.env.MONGODB_URI as string;
@@ -65,6 +66,7 @@ export async function getPosts(): Promise<Post[]> {
       hashtags: p.hashtags,
       ctaLink: p.ctaLink,
       disclaimer: p.disclaimer,
+      imageUrl: p.imageUrl,
     })) as Post[];
   } catch (error) {
     console.error("Error getting posts from MongoDB", error);
