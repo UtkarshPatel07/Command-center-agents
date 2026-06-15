@@ -42,12 +42,14 @@ export default function CommandDashboard() {
         body: JSON.stringify({ topic: topicInput, language })
       });
       const data = await res.json();
-      if (data.post) {
+      if (res.ok && data.post) {
         setPosts([data.post, ...posts]);
         setTopicInput('');
+      } else {
+        alert(`Failed to generate draft: ${data.error || 'Unknown error'}`);
       }
-    } catch (err) {
-      alert("Failed to generate draft");
+    } catch (err: any) {
+      alert(`Network error: Failed to generate draft`);
     } finally {
       setIsGenerating(false);
     }
