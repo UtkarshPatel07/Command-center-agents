@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Post, PostStatus } from '@/lib/db';
-import { Plus, Loader2, Copy, Trash2, Edit3, Send, CheckCircle2 } from 'lucide-react';
+import { Plus, Loader2, Copy, Trash2, Edit3, Send, CheckCircle2, X } from 'lucide-react';
 
 export default function CommandDashboard() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -11,8 +11,12 @@ export default function CommandDashboard() {
   const [language, setLanguage] = useState('English');
   const [isGenerating, setIsGenerating] = useState(false);
   const [scheduleDates, setScheduleDates] = useState<Record<string, string>>({});
+  
+  const [processingPosts, setProcessingPosts] = useState<Record<string, boolean>>({});
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState<string>('');
 
-  const statuses: PostStatus[] = ['Draft', 'Needs Review', 'Approved', 'Planned', 'Posted'];
+  const statuses: PostStatus[] = ['Draft', 'Needs Review', 'Approved', 'Planned', 'Posted', 'Cancelled'];
 
   useEffect(() => {
     fetchPosts();
@@ -77,35 +81,43 @@ export default function CommandDashboard() {
   };
 
   const autoPostToFacebook = async (post: Post) => {
+    setProcessingPosts(prev => ({...prev, [post.id]: true}));
     try {
       const res = await fetch('/api/facebook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
       if (res.ok) { alert("Successfully posted to Facebook!"); updatePost(post, { status: 'Posted' }); }
       else { alert(`Failed to post to Facebook: ${(await res.json()).error}`); }
     } catch (err) { alert("Error connecting to Facebook API"); }
+    finally { setProcessingPosts(prev => ({...prev, [post.id]: false})); }
   };
 
   const autoPostToLinkedIn = async (post: Post) => {
+    setProcessingPosts(prev => ({...prev, [post.id]: true}));
     try {
       const res = await fetch('/api/linkedin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
       if (res.ok) { alert("Successfully posted to LinkedIn!"); updatePost(post, { status: 'Posted' }); }
       else { alert(`Failed to post to LinkedIn: ${(await res.json()).error}`); }
     } catch (err) { alert("Error connecting to LinkedIn API"); }
+    finally { setProcessingPosts(prev => ({...prev, [post.id]: false})); }
   };
 
   const autoPostToTelegram = async (post: Post) => {
+    setProcessingPosts(prev => ({...prev, [post.id]: true}));
     try {
       const res = await fetch('/api/telegram', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
       if (res.ok) { alert("Successfully posted to Telegram!"); updatePost(post, { status: 'Posted' }); }
       else { alert(`Failed to post to Telegram: ${(await res.json()).error}`); }
     } catch (err) { alert("Error connecting to Telegram API"); }
+    finally { setProcessingPosts(prev => ({...prev, [post.id]: false})); }
   };
 
   const autoPostToReddit = async (post: Post) => {
+    setProcessingPosts(prev => ({...prev, [post.id]: true}));
     try {
       const res = await fetch('/api/reddit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
       if (res.ok) { alert("Successfully posted to Reddit!"); updatePost(post, { status: 'Posted' }); }
       else { alert(`Failed to post to Reddit: ${(await res.json()).error}`); }
     } catch (err) { alert("Error connecting to Reddit API"); }
+    finally { setProcessingPosts(prev => ({...prev, [post.id]: false})); }
   };
 
   const autoPostToInstagram = async (post: Post) => {
@@ -113,11 +125,18 @@ export default function CommandDashboard() {
       alert("Instagram requires an image! Please attach an Image URL to this draft before posting.");
       return;
     }
+    setProcessingPosts(prev => ({...prev, [post.id]: true}));
     try {
       const res = await fetch('/api/instagram', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(post) });
       if (res.ok) { alert("Successfully posted to Instagram!"); updatePost(post, { status: 'Posted' }); }
       else { alert(`Failed to post to Instagram: ${(await res.json()).error}`); }
     } catch (err) { alert("Error connecting to Instagram API"); }
+    finally { setProcessingPosts(prev => ({...prev, [post.id]: false})); }
+  };
+
+  const handleSaveEdit = (post: Post) => {
+    updatePost(post, { content: editContent });
+    setEditingPostId(null);
   };
 
   if (loading) {
@@ -166,12 +185,12 @@ export default function CommandDashboard() {
         </form>
       </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'flex', overflowX: 'auto', gap: '24px', paddingBottom: '20px' }}>
         {statuses.map(status => (
-          <div key={status} className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '650px', background: 'rgba(15, 23, 42, 0.4)' }}>
+          <div key={status} className="glass-panel" style={{ minWidth: '320px', display: 'flex', flexDirection: 'column', height: '650px', background: 'rgba(15, 23, 42, 0.4)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--panel-border)', paddingBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: status === 'Approved' ? 'var(--success-color)' : status === 'Needs Review' ? 'var(--warning-color)' : 'var(--accent-color)' }}></div>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: status === 'Approved' ? 'var(--success-color)' : status === 'Needs Review' ? 'var(--warning-color)' : status === 'Cancelled' ? 'var(--danger-color)' : 'var(--accent-color)' }}></div>
                 <h3 style={{ fontSize: '18px', fontWeight: 600 }}>{status}</h3>
               </div>
               <span style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 600 }}>
@@ -198,9 +217,34 @@ export default function CommandDashboard() {
                     />
                   </div>
 
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                    {post.content}
-                  </p>
+                  {editingPostId === post.id ? (
+                    <div style={{ marginBottom: '16px' }}>
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        style={{ width: '100%', minHeight: '150px', fontSize: '14px', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', resize: 'vertical' }}
+                      />
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <button onClick={() => handleSaveEdit(post)} className="button" style={{ flex: 1, fontSize: '12px', padding: '6px' }}>Save Changes</button>
+                        <button onClick={() => setEditingPostId(null)} className="button secondary" style={{ flex: 1, fontSize: '12px', padding: '6px' }}>Cancel Edit</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ position: 'relative' }}>
+                      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                        {post.content}
+                      </p>
+                      {(post.status === 'Draft' || post.status === 'Needs Review') && (
+                        <button 
+                          onClick={() => { setEditingPostId(post.id); setEditContent(post.content); }}
+                          style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'rgba(255,255,255,0.1)', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: 'white' }}
+                          title="Edit Content"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  )}
                   
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
                     {post.hashtags.map(tag => (
@@ -214,20 +258,20 @@ export default function CommandDashboard() {
                     
                     {post.status === 'Approved' && (
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                        <button onClick={() => autoPostToFacebook(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--fb-color)' }}>
-                          <Send size={14} /> FB Post
+                        <button disabled={processingPosts[post.id]} onClick={() => autoPostToFacebook(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--fb-color)' }}>
+                          {processingPosts[post.id] ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} FB Post
                         </button>
-                        <button onClick={() => autoPostToLinkedIn(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--li-color)' }}>
-                          <Send size={14} /> LI Post
+                        <button disabled={processingPosts[post.id]} onClick={() => autoPostToLinkedIn(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--li-color)' }}>
+                          {processingPosts[post.id] ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} LI Post
                         </button>
-                        <button onClick={() => autoPostToTelegram(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--tg-color)' }}>
-                          <Send size={14} /> TG Post
+                        <button disabled={processingPosts[post.id]} onClick={() => autoPostToTelegram(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'var(--tg-color)' }}>
+                          {processingPosts[post.id] ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} TG Post
                         </button>
-                        <button onClick={() => autoPostToReddit(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#FF4500' }}>
-                          <Send size={14} /> Reddit
+                        <button disabled={processingPosts[post.id]} onClick={() => autoPostToReddit(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#FF4500' }}>
+                          {processingPosts[post.id] ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Reddit
                         </button>
-                        <button onClick={() => autoPostToInstagram(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }}>
-                          <Send size={14} /> IG Post
+                        <button disabled={processingPosts[post.id]} onClick={() => autoPostToInstagram(post)} className="button" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }}>
+                          {processingPosts[post.id] ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} IG Post
                         </button>
                         <button onClick={() => copyForManual(post)} className="button secondary" style={{ fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', gridColumn: 'span 2' }}>
                           <Copy size={14} /> Copy for Manual Post
@@ -266,6 +310,12 @@ export default function CommandDashboard() {
                     {post.status !== 'Cancelled' && post.status !== 'Posted' && (
                       <button onClick={() => updatePost(post, { status: 'Cancelled' })} className="button secondary" style={{ padding: '6px 12px', fontSize: '12px', color: 'var(--danger-color)', border: 'none', background: 'transparent' }}>
                         Cancel Post
+                      </button>
+                    )}
+                    
+                    {post.status === 'Cancelled' && (
+                      <button onClick={() => updatePost(post, { status: 'Draft' })} className="button secondary" style={{ width: '100%' }}>
+                        Restore to Draft
                       </button>
                     )}
                   </div>
