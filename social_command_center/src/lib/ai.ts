@@ -23,12 +23,12 @@ export async function generateDraft(topic: string, language: string = 'English')
   CRITICAL RULES FOR SEO ARTICLE FORMATTING:
   1. The entire post and hashtags MUST be written in ${language}.
   2. The content MUST be structured exactly like a high-ranking SEO blog post. It MUST include:
-     - A catchy, bold Headline.
+     - A catchy Headline.
      - An engaging Introduction that hooks the reader.
-     - Well-structured Body Paragraphs with bold subheadings.
+     - Well-structured Body Paragraphs with subheadings.
      - Bullet points or numbered lists to break down complex information clearly.
      - A strong Conclusion or Summary.
-  3. Use proper Markdown formatting: use bold text (**text**) for emphasis and subheadings, and dashes (-) for bullet points.
+  3. DO NOT USE ANY MARKDOWN. Do NOT use asterisks (*) for bolding or italics. The text must be plain text. Use spacing and capital letters to create structure if needed.
   4. DO NOT use any of these restricted financial words/phrases: "guaranteed returns", "get rich", "passive income", "risk-free", "buy now", "sell now".
   5. The tone should be conversational yet highly professional and insightful, exactly like a premium educational SEO blog.
   6. Provide 3-5 relevant SEO hashtags at the very end.

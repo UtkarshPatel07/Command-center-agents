@@ -196,7 +196,7 @@ export default function CommandDashboard() {
                     />
                   </div>
 
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                     {post.content}
                   </p>
                   
