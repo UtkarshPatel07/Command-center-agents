@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { generateInstagramCaption } from '@/lib/ai';
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +15,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Instagram strictly requires an image to post. Please attach an Image URL." }, { status: 400 });
     }
 
-    const caption = `${post.content}\n\n${(post.hashtags || []).join(' ')}\n\n🔗 ${post.ctaLink}\n\n⚠️ ${post.disclaimer}`;
+    const caption = await generateInstagramCaption(
+      post.content,
+      post.hashtags || [],
+      post.ctaLink,
+      post.disclaimer
+    );
 
     // Step 1: Create media container
     const containerUrl = `https://graph.facebook.com/v23.0/${igUserId}/media`;
